@@ -93,6 +93,26 @@ harbor run --config configs/data-eng-bench-duckdb.claude-code.yaml --path tasks 
 A `k=3` sweep over all 103 DuckDB tasks is dominated by agent token cost and
 finishes in a few hours at `n_concurrent_trials: 4`.
 
+## Experimental Apache Doris demo (fork only)
+
+This fork includes one self-contained Doris tracer at
+[`tasks/dbt-daily-order-summary-doris`](tasks/dbt-daily-order-summary-doris).
+Each Harbor trial starts a disposable Apache Doris sidecar, installs
+`dbt-for-apache-doris==1.1.0`, creates a seven-row fixture, and checks the
+result with 13 deterministic verifier tests:
+
+```bash
+uvx harbor run \
+  --path tasks/dbt-daily-order-summary-doris \
+  --agent oracle \
+  --n-concurrent 1
+```
+
+The tracer is not in the canonical 103-task `dataset.toml` and is not eligible
+for the upstream leaderboard. See the task
+[`README`](tasks/dbt-daily-order-summary-doris/README.md) for the complete
+harness workflow, a coding-agent command, and version/production caveats.
+
 ## Running (Snowflake)
 
 The Snowflake variant runs the same 103 tasks against a real Snowflake account.

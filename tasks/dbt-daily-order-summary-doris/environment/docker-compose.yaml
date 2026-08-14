@@ -1,0 +1,63 @@
+services:
+  main:
+    build:
+      context: ${CONTEXT_DIR}
+      network: ${DBT_DORIS_BUILD_NETWORK:-default}
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+    image: ${MAIN_IMAGE_NAME}
+    entrypoint: ["sh", "-c"]
+    command: ["touch /tmp/entrypoint_ready && sleep infinity"]
+    depends_on:
+      doris:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/entrypoint_ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 300
+      start_period: 10s
+    environment:
+      - TEST_DIR=${TEST_DIR}
+      - DB_TYPE=doris
+      - DBT_PROFILES_DIR=/app/dbt_project
+      - DBT_SEND_ANONYMOUS_USAGE_STATS=false
+      - DORIS_HOST=doris
+      - DORIS_PORT=9030
+      - DORIS_USER=root
+      - DORIS_PASSWORD=
+      - DORIS_SOURCE_DATABASE=DBT_BENCH_ORDERS_DEMO
+      - DORIS_TARGET_DATABASE=dbt_bench_daily_analytics_demo
+    volumes:
+      - ${HOST_VERIFIER_LOGS_PATH}:${ENV_VERIFIER_LOGS_PATH}
+      - ${HOST_AGENT_LOGS_PATH}:${ENV_AGENT_LOGS_PATH}
+
+  # One disposable Doris instance per Harbor trial. No host ports, static IPs,
+  # or persistent volumes: Compose provides DNS and lifecycle isolation.
+  doris:
+    image: apache/doris:4.0.3-all-slim@sha256:3237bfb73471da7482c6575cecc1632c96dec09509cd2e60bcb798e2c5342823
+    environment:
+      RECOVERY: "false"
+      BROKER: "false"
+    expose:
+      - "8030"
+      - "8040"
+      - "9030"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysql -uroot -h127.0.0.1 -P9030 -Nse 'SHOW BACKENDS' 2>/dev/null | grep -w 127.0.0.1 | grep -w 9050 | grep -w true",
+        ]
+      start_period: 60s
+      interval: 5s
+      timeout: 5s
+      retries: 120
+    stop_grace_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 12G
