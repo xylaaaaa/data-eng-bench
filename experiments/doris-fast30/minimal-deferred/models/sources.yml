@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: finance
+    schema: FINANCE
+    tables:
+      - name: DEFERRED_REVENUE
+      - name: REVENUE_RECOGNITION
+  - name: orders
+    schema: ORDERS
+    tables:
+      - name: ORDERS

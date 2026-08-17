@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: orders
+    schema: ORDERS
+    tables:
+      - name: ORDERS
+      - name: ORDER_LINES
+  - name: inventory
+    schema: INVENTORY
+    tables:
+      - name: INVENTORY_LEVELS
+  - name: product
+    schema: PRODUCT
+    tables:
+      - name: PRODUCTS
+      - name: PRODUCT_VARIANTS

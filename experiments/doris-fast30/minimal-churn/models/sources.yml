@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: analytics
+    schema: ANALYTICS
+    tables:
+      - name: FACT_SALES
+      - name: DIM_CUSTOMER
+      - name: DIM_DATE
+  - name: customer
+    schema: CUSTOMER
+    tables:
+      - name: CUSTOMERS

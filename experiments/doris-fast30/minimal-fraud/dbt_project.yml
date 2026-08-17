@@ -1,0 +1,14 @@
+name: retail_dw_master
+version: "1.0.0"
+config-version: 2
+profile: retail_dw_master
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: ["target"]
+
+# The local Doris sidecar has one backend.  The wrapper applies the same
+# setting to canonical projects; keeping it here makes the reduced-project
+# smoke equivalent.
+models:
+  +replication_num: 1

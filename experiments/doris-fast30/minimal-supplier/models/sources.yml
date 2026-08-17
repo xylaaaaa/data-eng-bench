@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: procurement
+    schema: PROCUREMENT
+    tables:
+      - name: SUPPLIER_INVOICES
+      - name: SUPPLIERS
+  - name: finance
+    schema: FINANCE
+    tables:
+      - name: CURRENCY_EXCHANGE_RATES

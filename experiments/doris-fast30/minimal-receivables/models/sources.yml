@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: finance
+    schema: FINANCE
+    tables:
+      - name: CUSTOMER_INVOICES
+      - name: CUSTOMER_PAYMENT_APPLICATIONS
+      - name: CUSTOMER_PAYMENTS
+      - name: CUSTOMER_CREDITS

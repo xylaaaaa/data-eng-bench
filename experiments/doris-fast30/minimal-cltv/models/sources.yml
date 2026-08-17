@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: orders
+    schema: ORDERS
+    tables:
+      - name: ORDERS

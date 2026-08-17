@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: inventory
+    schema: INVENTORY
+    tables:
+      - name: INVENTORY_TRANSACTIONS
+  - name: product
+    schema: PRODUCT
+    tables:
+      - name: PRODUCT_VARIANTS
+      - name: PRODUCTS
+      - name: PRODUCT_CATEGORIES

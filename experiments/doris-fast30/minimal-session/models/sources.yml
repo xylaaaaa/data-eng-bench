@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: digital
+    schema: DIGITAL
+    tables:
+      - name: WEB_SESSIONS
+  - name: analytics
+    schema: ANALYTICS
+    tables:
+      - name: FACT_SALES

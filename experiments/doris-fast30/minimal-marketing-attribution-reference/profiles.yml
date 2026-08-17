@@ -1,0 +1,8 @@
+retail_dw_master:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /app/database/retail.duckdb
+      schema: analytics
+      threads: 4

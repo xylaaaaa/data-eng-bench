@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: customer
+    schema: CUSTOMER
+    tables:
+      - name: CUSTOMERS

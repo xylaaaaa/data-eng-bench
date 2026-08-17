@@ -1,0 +1,14 @@
+name: retail_dw_master
+version: "1.0.0"
+config-version: 2
+profile: retail_dw_master
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+target-path: target
+clean-targets: ["target"]
+
+models:
+  +replication_num: 1
+
+snapshots:
+  +replication_num: 1
