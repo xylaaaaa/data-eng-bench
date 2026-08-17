@@ -1,0 +1,574 @@
+version: 1
+
+fixture_source:
+  image: ghcr.io/snowflake-labs/data-eng-bench-base:1.0.0@sha256:29bcb90579ecc8fc0dbb0d658b2a938374ac057ff816c78746520d48ed1edb09
+  container_path: /app/database/retail.duckdb
+  size_bytes: 491008000
+  sha256: cddd207c9bdf2c0e2a85440038a95c8262bb8327f8849bcfee29be4fb24da5ba
+
+tasks:
+  - task: cohort-retention-matrix
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-sources
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - CUSTOMER.CUSTOMERS
+        - ORDERS.ORDERS
+      unique: []
+    target_databases:
+      - CUSTOMER
+      - ORDERS
+      - main
+      - main_marketing_analytics
+    oracle: canonical
+
+  - task: dbt-cart-abandonment-recovery
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-sources
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.ABANDONED_CARTS
+        - main.WEB_SESSIONS
+        - main.int_sales__orders_enriched
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-customer-churn-cohorts
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-churn
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - ANALYTICS.DIM_CUSTOMER
+        - ANALYTICS.DIM_DATE
+        - ANALYTICS.FACT_SALES
+        - CUSTOMER.CUSTOMERS
+      unique: []
+    target_databases:
+      - ANALYTICS
+      - CUSTOMER
+      - main
+    oracle: canonical
+
+  - task: dbt-customer-cltv-forecasting
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-cltv
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - ORDERS.ORDERS
+      unique: []
+    target_databases:
+      - ORDERS
+      - analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-customer-cross-sell-insights
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-cross-sell-backend
+    container_project_dir: /app/cross_sell_backend
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/cross_sell_backend
+    db_type: doris
+    fixtures:
+      duplicate:
+        - main.dim_product_variants
+        - main.int_customers__unified
+        - main.int_sales__order_lines
+        - main.int_sales__orders_enriched
+        - main.stg_product__product_categories
+        - main.stg_product__product_category_mapping
+      unique: []
+    target_databases:
+      - analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-daily-order-summary
+    project_mode: self_contained
+    project_path: null
+    container_project_dir: /app/dbt_project
+    env: {}
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - ORDERS.ORDERS
+      unique: []
+    target_databases:
+      - ORDERS
+      - daily_analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-fix-cac-payback-waterfall
+    project_mode: self_contained
+    project_path: null
+    container_project_dir: /app/dbt_project
+    env: {}
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_fact_marketing_spend
+      unique: []
+    target_databases:
+      - analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-fix-customer-snapshot-and-build-dimension
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-snapshot
+    container_project_dir: /app/dbt_snapshot
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_snapshot
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - CUSTOMER.CUSTOMERS
+      unique: []
+    target_databases:
+      - CUSTOMER
+      - main
+      - snapshots
+    oracle: canonical
+
+  - task: dbt-fix-daily-cohorts
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-shared
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_orders__orders
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-fix-division-by-zero
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-shared
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.int_sales__orders_enriched
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-fix-marketing-attribution
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-marketing-attribution-reference
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.int_sessions_events_joined
+        - main.stg_ga__events
+        - main.stg_ga__sessions
+      unique: []
+    target_databases:
+      - analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-fix-refund-reconciliation
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-shared
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_orders__return_lines
+        - main.stg_orders__returns
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-fraud-detection-model
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-fraud
+    container_project_dir: /app/fraud_minimal
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/fraud_minimal
+      DBT_THREADS: "1"
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.ADDRESSES
+        - main.ORDER_LINES
+        - main.orders
+      unique: []
+    target_databases:
+      - fraud_analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-inventory-turnover-analysis
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-inventory
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - INVENTORY.INVENTORY_LEVELS
+        - ORDERS.ORDER_LINES
+        - ORDERS.ORDERS
+        - PRODUCT.PRODUCTS
+        - PRODUCT.PRODUCT_VARIANTS
+      unique: []
+    target_databases:
+      - INVENTORY
+      - ORDERS
+      - PRODUCT
+      - analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-multi-warehouse-stock-rebalance
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-shared
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.int_sales__order_lines
+        - main.int_sales__orders_enriched
+        - main.stg_inventory__inventory_levels
+        - main.stg_inventory__warehouses
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-price-elasticity
+    project_mode: self_contained
+    project_path: null
+    container_project_dir: /app/dbt_project
+    env: {}
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - ORDERS.ORDER_LINES
+        - ORDERS.ORDERS
+        - PRODUCT.PRICE_HISTORY
+      unique: []
+    target_databases:
+      - ORDERS
+      - PRODUCT
+      - elasticity_analytics
+      - main
+    oracle: canonical
+
+  - task: dbt-product-affinity
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-shared
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_orders__order_lines
+        - main.stg_orders__orders
+        - main.stg_product__products
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: dbt-receivables-aging-buckets
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-receivables
+    container_project_dir: /app/dbt_receivables
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_receivables
+    db_type: duckdb
+    fixtures:
+      duplicate: []
+      unique:
+        - FINANCE.CUSTOMER_CREDITS
+        - FINANCE.CUSTOMER_INVOICES
+        - FINANCE.CUSTOMER_PAYMENT_APPLICATIONS
+        - FINANCE.CUSTOMER_PAYMENTS
+    target_databases:
+      - FINANCE
+      - main
+    oracle: canonical
+
+  - task: dbt-rfm-customer-segmentation
+    project_mode: self_contained
+    project_path: null
+    container_project_dir: /app/dbt_project
+    env: {}
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.customers
+        - main.orders
+      unique: []
+    target_databases:
+      - main
+      - rfm_analytics
+    oracle: canonical
+
+  - task: dbt-session-attribution
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-session
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - ANALYTICS.FACT_SALES
+        - DIGITAL.WEB_SESSIONS
+      unique: []
+    target_databases:
+      - ANALYTICS
+      - DIGITAL
+      - main
+    oracle: canonical
+
+  - task: dbt-supplier-payment-optimization
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-supplier
+    container_project_dir: /app/dbt_supplier
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_supplier
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - FINANCE.CURRENCY_EXCHANGE_RATES
+        - PROCUREMENT.SUPPLIERS
+        - PROCUREMENT.SUPPLIER_INVOICES
+      unique: []
+    target_databases:
+      - FINANCE
+      - PROCUREMENT
+      - main
+    oracle: canonical
+
+  - task: dbt-test-orders-filter
+    project_mode: base
+    project_path: base-image/dbt_models_duckdb
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.orders
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: deferred-revenue-recognition
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-deferred
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - FINANCE.DEFERRED_REVENUE
+        - FINANCE.REVENUE_RECOGNITION
+        - ORDERS.ORDERS
+      unique: []
+    target_databases:
+      - FINANCE
+      - ORDERS
+      - main
+      - main_finance_analytics
+    oracle: canonical
+
+  - task: fifo-inventory-cogs
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-fifo
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - INVENTORY.INVENTORY_TRANSACTIONS
+        - PRODUCT.PRODUCTS
+        - PRODUCT.PRODUCT_CATEGORIES
+        - PRODUCT.PRODUCT_VARIANTS
+      unique: []
+    target_databases:
+      - INVENTORY
+      - PRODUCT
+      - main
+      - main_inventory_analytics
+    oracle: fifo_doris
+
+  - task: marketing-campaigns-harbor
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-marketing
+    container_project_dir: /app/dbt_marketing
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_marketing
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_marketing__campaign_audiences
+        - main.stg_marketing__campaign_channels
+        - main.stg_marketing__campaign_performance
+        - main.stg_marketing__coupon_redemptions
+        - main.stg_marketing__gift_card_transactions
+        - main.stg_marketing__gift_cards
+        - main.stg_marketing__loyalty_points_transactions
+        - main.stg_marketing__loyalty_programs
+        - main.stg_marketing__marketing_campaigns
+        - main.stg_marketing__promotion_redemptions
+        - main.stg_marketing__promotion_rules
+        - main.stg_marketing__promotions
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: pos-operations
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-pos
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_pos__coupon_usage
+        - main.stg_pos__coupons
+        - main.stg_pos__promotions
+        - main.stg_pos__tenders
+        - main.stg_pos__trans_lines
+        - main.stg_pos__transactions
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: promotional-lift-analysis
+    project_mode: self_contained
+    project_path: null
+    container_project_dir: /app/dbt_project
+    env: {}
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - MARKETING.PROMOTIONS
+        - MARKETING.PROMOTION_PRODUCTS
+        - MARKETING.PROMOTION_REDEMPTIONS
+        - ORDERS.ORDER_LINES
+        - ORDERS.ORDERS
+        - PRODUCT.PRODUCTS
+      unique: []
+    target_databases:
+      - MARKETING
+      - ORDERS
+      - PRODUCT
+      - main
+      - promo_analytics
+    oracle: canonical
+
+  - task: tier-migration-analysis
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-sources
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - CUSTOMER.CUSTOMER_TIERS
+        - CUSTOMER.CUSTOMER_TIER_HISTORY
+        - ORDERS.ORDERS
+      unique: []
+    target_databases:
+      - CUSTOMER
+      - ORDERS
+      - main
+      - main_tier_analytics
+    oracle: canonical
+
+  - task: web-session-quality-scoring
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-web-session
+    container_project_dir: /app/dbt_models_duckdb
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_models_duckdb
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - main.stg_digital__shopping_cart_items
+        - main.stg_digital__shopping_carts
+        - main.stg_digital__web_events
+        - main.stg_digital__web_page_views
+        - main.stg_digital__web_sessions
+        - main.stg_digital__wishlist_items
+      unique: []
+    target_databases:
+      - main
+    oracle: canonical
+
+  - task: workforce-analytics
+    project_mode: minimal
+    project_path: experiments/doris-fast30/minimal-workforce
+    container_project_dir: /app/dbt_transforms
+    env:
+      DBT_PROJECT_DIR_DUCKDB: /app/dbt_transforms
+    db_type: duckdb
+    fixtures:
+      duplicate:
+        - hr.cost_center_assignments
+        - hr.departments
+        - hr.employees
+        - hr.employee_compensation
+        - hr.employee_departments
+        - hr.employee_positions
+        - hr.employee_schedules
+        - hr.job_positions
+        - hr.org_hierarchy
+        - hr.payroll_details
+        - hr.payroll_runs
+        - hr.time_entries
+      unique: []
+    target_databases:
+      - hr
+      - main
+    oracle: canonical

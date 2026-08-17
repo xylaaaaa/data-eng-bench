@@ -6,5 +6,11 @@ model-paths: ["models"]
 target-path: target
 clean-targets: ["target"]
 
+on-run-start:
+  - "CREATE OR REPLACE VIEW `main`.`stg_finance__customer_credits` AS SELECT * FROM `FINANCE`.`CUSTOMER_CREDITS`"
+  - "CREATE OR REPLACE VIEW `main`.`stg_finance__customer_invoices` AS SELECT * FROM `FINANCE`.`CUSTOMER_INVOICES`"
+  - "CREATE OR REPLACE VIEW `main`.`stg_finance__customer_payment_applications` AS SELECT * FROM `FINANCE`.`CUSTOMER_PAYMENT_APPLICATIONS`"
+  - "CREATE OR REPLACE VIEW `main`.`stg_finance__customer_payments` AS SELECT * FROM `FINANCE`.`CUSTOMER_PAYMENTS`"
+
 models:
   +replication_num: 1

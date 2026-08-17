@@ -45,6 +45,11 @@ services:
       - "8030"
       - "8040"
       - "9030"
+    tmpfs:
+      - /opt/apache-doris/be/storage:size=4g,mode=0755
+      - /opt/apache-doris/fe/doris-meta:size=2g,mode=0755
+    cpus: "4.0"
+    mem_limit: 12g
     healthcheck:
       test:
         [
@@ -56,8 +61,3 @@ services:
       timeout: 5s
       retries: 120
     stop_grace_period: 45s
-    deploy:
-      resources:
-        limits:
-          cpus: "4.0"
-          memory: 12G

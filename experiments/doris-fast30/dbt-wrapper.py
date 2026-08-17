@@ -407,8 +407,8 @@ def rewrite_doris_sql(sql: str) -> str:
     sql = re.sub(r"\bAS\s+TIMESTAMP\b", "AS DATETIME", sql, flags=re.IGNORECASE)
     sql = _rewrite_postfix_casts(sql)
     sql = _rewrite_dayofweek(sql)
-    sql = _rewrite_concat_operators(sql)
     sql = _rewrite_rfm_concat(sql)
+    sql = _rewrite_concat_operators(sql)
     sql = _rewrite_ordered_percentiles(sql)
     # DuckDB's `/` operator returns floating-point output for integer ratios.
     # Doris can retain DECIMAL for the same expression, which changes the
@@ -487,6 +487,7 @@ def rewrite_profiles(arguments: list[str]) -> None:
     database = os.environ.get("DORIS_TARGET_DATABASE", "main")
     username = os.environ.get("DORIS_USER", "root")
     password = os.environ.get("DORIS_PASSWORD", "")
+    threads = int(os.environ.get("DBT_THREADS", "4"))
     for path in candidate_profiles(arguments):
         document = yaml.safe_load(path.read_text()) or {}
         changed = False
@@ -513,7 +514,7 @@ def rewrite_profiles(arguments: list[str]) -> None:
                         "username": username,
                         "password": password,
                         "schema": target_schema,
-                        "threads": 4,
+                        "threads": threads,
                     }
                 )
                 changed = True
@@ -607,6 +608,8 @@ def patch_project_configs() -> None:
         if not root.is_dir():
             continue
         for path in root.rglob("dbt_project.yml"):
+            if not path.is_file():
+                continue
             document = yaml.safe_load(path.read_text()) or {}
             models = document.get("models")
             if not isinstance(models, dict):
