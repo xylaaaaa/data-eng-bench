@@ -130,12 +130,18 @@ def find_model_and_tests(manifest):
     assert config.get("buckets") == 1
     assert config.get("replication_num") == 1
 
+    # The task constrains the physical source, not the author's logical dbt
+    # source name. Validate the Doris relation and lineage without imposing an
+    # undocumented alias such as "orders" versus "orders_source".
     sources = [
         source
         for source in manifest["sources"].values()
-        if source.get("source_name") == "orders" and source.get("name") == "orders"
+        if str(source.get("identifier", source.get("name", ""))).casefold()
+        == "orders"
+        and SOURCE_DATABASE
+        in {source.get("database"), source.get("schema")}
     ]
-    assert len(sources) == 1, "Expected the orders.orders dbt source"
+    assert len(sources) == 1, f"Expected one dbt source for {SOURCE_RELATION}"
     assert sources[0]["unique_id"] in model["depends_on"]["nodes"]
 
     generic_tests = {}

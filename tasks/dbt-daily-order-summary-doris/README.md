@@ -95,6 +95,9 @@ Snowflake adapters. `dbt-for-apache-doris==1.1.0` requires dbt Core 1.12, so
 this task installs the Doris adapter in `/opt/dbt-doris`, an isolated virtual
 environment layered over the canonical image. This preserves the image's
 terminal-agent toolchain without silently upgrading its global dbt install.
+The image also restores the virtual environment from `/etc/profile.d` because
+Harbor runs terminal-agent commands through a login shell, and Debian's
+`/etc/profile` otherwise replaces the Docker `PATH` value with the system path.
 
 The sidecar is pinned to the official
 `apache/doris:4.0.3-all-slim` image digest because it can start one FE and one

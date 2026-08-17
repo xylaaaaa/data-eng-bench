@@ -19,6 +19,7 @@ RUN uv venv --python python3 /opt/dbt-doris \
         "pytest-json-ctrf==0.3.5"
 
 COPY init_doris.py /init_doris.py
+COPY dbt-doris-path.sh /etc/profile.d/dbt-doris.sh
 
 ENV DB_TYPE=doris
 ENV DBT_PROFILES_DIR=/app/dbt_project
