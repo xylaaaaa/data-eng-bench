@@ -136,10 +136,11 @@ runtime digest is the authoritative input for this experiment.
 
 ## Real Agent follow-up
 
-The Doris-native tracer at
-`tasks/dbt-daily-order-summary-doris` is the first real Harbor task. Its
-`oracle` run validates the environment; a Codex run must use Harbor's `codex`
-agent, must not expose `solution/` or `tests/` during the Agent phase, and must
-be reported as an Agent trial rather than as part of the golden-solution table
-above. Extending this distinction to all 30 tasks requires generated Doris
-task variants and is intentionally a separate deliverable.
+The Doris-native tracers at
+`tasks/dbt-daily-order-summary-doris` and
+`tasks/dbt-test-orders-filter-doris` are the first two real Harbor tasks. Each
+has a passing `oracle` run and one passing Codex trial; the Agent phase does not
+receive `solution/` or `tests/`, and its result is reported separately from the
+golden-solution table above. Extending this distinction to all 30 tasks
+requires generated Doris task variants and is intentionally a separate
+deliverable.
