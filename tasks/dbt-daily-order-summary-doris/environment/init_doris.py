@@ -60,9 +60,14 @@ def wait_for_doris() -> mysql.connector.MySQLConnection:
             cursor.execute("SHOW BACKENDS")
             columns = [column[0].lower() for column in cursor.description]
             alive_index = columns.index("alive")
+            capacity_index = columns.index("availcapacity")
             backends = cursor.fetchall()
             cursor.close()
-            if any(str(row[alive_index]).lower() == "true" for row in backends):
+            if any(
+                str(row[alive_index]).lower() == "true"
+                and re.search(r"[1-9]", str(row[capacity_index]))
+                for row in backends
+            ):
                 return connection
             connection.close()
         except (mysql.connector.Error, ValueError) as error:

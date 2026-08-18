@@ -2,21 +2,21 @@
 version = "1.0.0"
 
 [task]
-name = "apache-doris/dbt-daily-order-summary-doris"
-description = "Build and verify a standalone dbt project against Apache Doris"
+name = "apache-doris/dbt-test-orders-filter-doris"
+description = "Filter test, sample, and internal orders in a standalone Doris dbt project"
 authors = [
     { name = "Snowflake Inc.", email = "opensource@snowflake.com" },
     { name = "Apache Doris Contributors", email = "dev@doris.apache.org" },
 ]
-keywords = ["dbt", "apache-doris", "aggregation", "daily-metrics", "demo"]
+keywords = ["dbt", "apache-doris", "data-quality", "orders", "demo"]
 
 [metadata]
-name = "dbt-daily-order-summary-doris"
+name = "dbt-test-orders-filter-doris"
 db_name = "DBT_BENCH_DORIS_DEMO"
-description = "Experimental Doris tracer derived from dbt-daily-order-summary"
+description = "Experimental Doris tracer derived from dbt-test-orders-filter"
 difficulty = "easy"
 category = "analytics"
-tags = ["dbt", "apache-doris", "aggregation", "daily-metrics", "demo"]
+tags = ["dbt", "apache-doris", "data-quality", "orders", "demo"]
 
 [verifier]
 timeout_sec = 900.0
